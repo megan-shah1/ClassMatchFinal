@@ -10,6 +10,11 @@ import CoreData
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @State private var username = ""
+    @State private var password = ""
+    @State private var wrongUsername = 0
+    @State private var wrongPassword = 0
+    @State private var showLoginScreen = false
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
@@ -18,28 +23,88 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+            ZStack{
+                Color.blue
+                    .ignoresSafeArea()
+                Circle ()
+                    .scale(1.8)
+                    .foregroundColor(.white.opacity(0.3))
+                
+                Circle ()
+                    .scale(1.47)
+                    .foregroundColor(.white.opacity(3))
+                VStack{
+                    HStack {
+                        Text("Class").foregroundColor(.blue).font(.largeTitle).bold().padding()
+                        Text("Match").foregroundColor(.black).font(.largeTitle).bold().padding(.horizontal, -20)
+    
+                }
+                    Text("Login")
+                        .foregroundColor(.gray)
+                        .font(.title2)
+                        .bold()
+                        .padding()
+                    TextField("Username", text: $username)
+                        .padding()
+                        .frame(width: 300, height: 50)
+                        .background(Color.black.opacity(0.05))
+                        .cornerRadius(10)
+                        .border(.red, width: CGFloat(wrongUsername))
+                    
+                    SecureField("Password", text: $password)
+                        .padding()
+                        .frame(width: 300, height: 50)
+                        .background(Color.black.opacity(0.05))
+                        .cornerRadius(10)
+                        .border(.red, width: CGFloat(wrongPassword))
+                    
+                    Button("Login") {
+                        userVerification(username: username, password: password)
                     }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    .foregroundColor(.white)
+                    .frame(width: 300, height: 50)
+                    .background(Color.blue)
+                    .cornerRadius(10)
+                    
+                    NavigationLink(destination: HStack {
+                        Text("                Welcome            ")
+                        .bold()
+                        .font(.largeTitle) + Text( "   \n       @\(username)").bold().font(.largeTitle).foregroundColor(Color.gray)
+                        
+                        + Text(" \n \n \n     ClassMatch is an app designed to help make  \n      real connections in your classes at the tip of \n     your fingers. ").bold().foregroundColor(Color.blue)} , isActive: $showLoginScreen) {
+                        
+                        AnyView(_fromValue: "Hello")
+                        
                     }
+                    
                 }
+    
+                
+            
             }
-            Text("Select an item")
+            .navigationBarHidden(true)
         }
+        
+    }
+    
+    func userVerification (username: String, password: String) {
+        if username.count >= 6 {
+            wrongUsername = 0
+            
+            if password.count >= 6 {
+                wrongPassword = 0
+                showLoginScreen = true
+            }
+            
+            else {
+                wrongPassword = 2
+            }
+        }
+        
+        else {
+            wrongUsername = 2
+        }
+        
     }
 
     private func addItem() {
@@ -86,3 +151,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
     }
 }
+
